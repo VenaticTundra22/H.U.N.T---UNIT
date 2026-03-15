@@ -99,7 +99,9 @@ client.on('interactionCreate', async interaction => {
             customEmbed.setImage(imageUrl);
         }
 
-        await interaction.reply({ embeds: [customEmbed] });
+        await interaction.channel.send({ embeds: [customEmbed] });
+        // On confirme la création à l'utilisateur de manière éphémère
+        await interaction.reply({ content: '✅ Embed créé et envoyé avec succès !', ephemeral: true });
     }
 
         // --- GESTION DU BUILDER AVANCÉ (Façon Discohook) ---
