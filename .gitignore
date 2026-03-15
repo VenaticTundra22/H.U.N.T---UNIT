@@ -1,0 +1,5 @@
+# Dépendances
+node_modules/
+
+# Fichiers secrets (NE JAMAIS COMMIT)
+.env

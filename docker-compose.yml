@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  hunt-unit:
+    build: .
+    container_name: hunt_unit_bot
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.10'
+          memory: 128M

@@ -1,0 +1,9 @@
+{
+  "name": "hunt-unit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^14.14.0",
+    "dotenv": "^16.4.5"
+  }
+}
