@@ -20,7 +20,6 @@ discord-bot/
 │   └── TEMPLATE_buttons.js
 └── GUIDE_COMMANDES.md    ← Ce fichier
 ```
-```
 
 ---
 
