@@ -89,23 +89,24 @@ client.once('ready', async () => {
     const commandsJSON = [...commandModules.values()].map(cmd => cmd.definition.toJSON());
 
     try {
-        // ── Nettoyage unique : si GUILD_ID défini, vider les commandes guild ──
-        // (supprime les commandes guild qui causaient l'absence de badge
-        //  et le non-fonctionnement sur les autres serveurs)
         if (GUILD_ID) {
+            // ── Enregistrement LOCAL (Mode DEV) ───────────────────────────────
+            // Commandes disponibles instantanément, mais uniquement sur ce serveur.
             await rest.put(
                 Routes.applicationGuildCommands(client.user.id, GUILD_ID),
-                { body: [] }
+                { body: commandsJSON }
             );
-            console.log(`[H.U.N.T - UNIT] 🧹 Commandes guild vidées (nettoyage serveur ${GUILD_ID}).`);
+            console.log(`[H.U.N.T - UNIT] 🛠️  Mode DEV activé : Commandes synchronisées instantanément sur le serveur ${GUILD_ID}.`);
+        } else {
+            // ── Enregistrement GLOBAL (Mode PROD) ─────────────────────────────
+            // Commandes visibles sur tous les serveurs, active le badge APP.
+            // Discord applique ces changements avec un léger délai (souvent < 5min).
+            await rest.put(
+                Routes.applicationCommands(client.user.id),
+                { body: commandsJSON }
+            );
+            console.log('[H.U.N.T - UNIT] 🌍 Mode PROD activé : Commandes globales synchronisées (badge restauré, tous serveurs actifs).\n');
         }
-
-        // ── Enregistrement GLOBAL : badge + tous les serveurs ─────────────────
-        // Les commandes globales sont visibles partout où le bot est invité.
-        // Discord applique les changements en général en quelques minutes
-        // (max théorique 1h, en pratique souvent < 5min pour les serveurs actifs).
-        await rest.put(Routes.applicationCommands(client.user.id), { body: commandsJSON });
-        console.log('[H.U.N.T - UNIT] ✅ Commandes globales synchronisées — badge restauré, tous serveurs actifs.\n');
 
     } catch (error) {
         console.error('[H.U.N.T - UNIT] ❌ Erreur de synchronisation des commandes :', error);

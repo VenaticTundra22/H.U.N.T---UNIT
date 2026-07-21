@@ -20,9 +20,21 @@ discord-bot/
 │   └── TEMPLATE_buttons.js
 └── GUIDE_COMMANDES.md    ← Ce fichier
 ```
+```
 
 ---
 
+## 🌍 Mode DEV vs Mode PROD (Configuration .env)
+
+Le comportement d'enregistrement des commandes dépend directement de votre fichier `.env` :
+
+- **🛠️ MODE DEV** (Si `GUILD_ID` est renseigné) :
+  Le bot enregistre les commandes **uniquement** sur le serveur spécifié. L'enregistrement est **instantané**, ce qui est parfait pour développer et tester vos commandes sans attendre.
+
+- **🌍 MODE PROD** (Si `GUILD_ID` est vide ou commenté) :
+  Le bot enregistre les commandes **globalement**. Elles seront disponibles sur tous les serveurs où le bot est invité. C'est ce mode qui permet d'obtenir le badge "APP". *Note : Discord peut mettre quelques minutes pour actualiser les commandes globales.*
+
+---
 ## ⚡ Créer une nouvelle commande — Étapes rapides
 
 ```bash
@@ -70,165 +82,17 @@ module.exports = { definition, handleInteraction };
 
 ---
 
-## 🎨 Options de SlashCommandBuilder
-
-```js
-new SlashCommandBuilder()
-    .setName('commande')                  // Obligatoire — minuscules, tirets autorisés
-    .setDescription('Description courte') // Obligatoire — max 100 caractères
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator) // Admins seulement
-
-    // ─── Types d'options ─────────────────────────────────────────
-    .addStringOption(opt => opt
-        .setName('texte').setDescription('Un texte').setRequired(true)
-        .setMaxLength(100)
-        .addChoices({ name: 'Option A', value: 'a' }) // Choix prédéfinis (optionnel)
-    )
-    .addIntegerOption(opt => opt
-        .setName('nombre').setDescription('Un entier').setMinValue(1).setMaxValue(999)
-    )
-    .addNumberOption(opt => opt
-        .setName('decimal').setDescription('Un nombre décimal')
-    )
-    .addBooleanOption(opt => opt
-        .setName('actif').setDescription('Vrai ou Faux')
-    )
-    .addUserOption(opt => opt
-        .setName('utilisateur').setDescription('Un membre du serveur')
-    )
-    .addChannelOption(opt => opt
-        .setName('salon').setDescription('Un salon')
-    )
-    .addRoleOption(opt => opt
-        .setName('role').setDescription('Un rôle')
-    )
-    .addAttachmentOption(opt => opt
-        .setName('fichier').setDescription('Un fichier uploadé')
-    )
-;
-```
-
-### Lire les options dans le handler
-
-```js
-const texte       = interaction.options.getString('texte');
-const nombre      = interaction.options.getInteger('nombre') ?? 10; // Valeur par défaut
-const utilisateur = interaction.options.getUser('utilisateur') ?? interaction.user;
-const salon       = interaction.options.getChannel('salon') ?? interaction.channel;
-```
-
 ---
 
-## 🪟 Modaux (Formulaires)
+## 📝 Templates prêts à l'emploi
 
-```js
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+Pour éviter de réinventer la roue ou d'avoir à mémoriser l'API de Discord, **3 templates complets et commentés** sont à votre disposition dans le dossier `/templates/` :
 
-// Création du modal
-const modal = new ModalBuilder()
-    .setCustomId('mon-modal')          // ID unique dans tout le bot
-    .setTitle('Titre du formulaire');  // Affiché à l'utilisateur
+1. **`TEMPLATE_simple.js`** : Pour une commande classique (avec options de texte, nombre, etc).
+2. **`TEMPLATE_buttons.js`** : Pour une commande qui affiche des boutons cliquables.
+3. **`TEMPLATE_modal.js`** : Pour une commande qui ouvre un formulaire (modal) pour saisir des données.
 
-// Champ texte court
-const champCourt = new TextInputBuilder()
-    .setCustomId('champ1')
-    .setLabel('Nom du champ')
-    .setStyle(TextInputStyle.Short)    // Une ligne
-    .setRequired(true)
-    .setMaxLength(256);
-
-// Champ texte long
-const champLong = new TextInputBuilder()
-    .setCustomId('champ2')
-    .setLabel('Description')
-    .setStyle(TextInputStyle.Paragraph) // Multi-lignes
-    .setRequired(false)
-    .setMaxLength(4096);
-
-// Chaque champ dans sa propre ActionRow (max 5 champs)
-modal.addComponents(
-    new ActionRowBuilder().addComponents(champCourt),
-    new ActionRowBuilder().addComponents(champLong),
-);
-
-// Afficher le modal
-await interaction.showModal(modal);
-```
-
-### Lire les valeurs soumises
-
-```js
-if (interaction.isModalSubmit() && interaction.customId === 'mon-modal') {
-    const valeur1 = interaction.fields.getTextInputValue('champ1');
-    // Lecture sécurisée (sans crash si champ vide) :
-    const { getSafeValue } = require('../utils/embedHelper');
-    const valeur2 = getSafeValue(interaction, 'champ2');
-}
-```
-
----
-
-## 🔘 Boutons
-
-```js
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-
-const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-        .setCustomId('mon-bouton-oui')      // ID unique dans tout le bot
-        .setLabel('✅ Confirmer')
-        .setStyle(ButtonStyle.Success),      // Primary | Secondary | Success | Danger | Link
-    new ButtonBuilder()
-        .setCustomId('mon-bouton-non')
-        .setLabel('❌ Annuler')
-        .setStyle(ButtonStyle.Danger)
-        .setDisabled(false),                 // true = bouton grisé
-);
-
-// Envoyer avec boutons
-await interaction.reply({ content: 'Confirmer ?', components: [row], ephemeral: true });
-```
-
-### Gérer le clic
-
-```js
-if (interaction.isButton() && interaction.customId === 'mon-bouton-oui') {
-    // Modifier le message original (retire les boutons)
-    await interaction.update({ content: '✅ Confirmé !', components: [] });
-
-    // Ou envoyer un nouveau message sans toucher au message original
-    await interaction.reply({ content: '✅ Confirmé !', ephemeral: true });
-}
-```
-
----
-
-## 🛠️ Fonctions utilitaires disponibles (`utils/embedHelper.js`)
-
-```js
-const { buildEmbed, validateColor, getSafeValue, extractEmbedFields } = require('../utils/embedHelper');
-
-// Construire un embed
-const embed = buildEmbed({
-    title: 'Mon titre',
-    description: 'Ma description',
-    color: '#FF0000',        // Optionnel
-    imageUrl: 'https://…',  // Optionnel
-    footer: 'Mon footer',    // Optionnel
-    timestamp: true,         // Optionnel, défaut true
-});
-
-// Valider une couleur hex
-const color = validateColor('#GGG000'); // Retourne '#2b2d31' si invalide
-
-// Lire un champ de modal sans crash
-const value = getSafeValue(interaction, 'champ1'); // '' si absent
-
-// Extraire tous les champs d'embed depuis un modal
-// (fonctionne si le modal contient : title, description, color, imageUrl, footer)
-const fields = extractEmbedFields(interaction);
-const embed = buildEmbed(fields);
-```
+💡 **Astuce** : Le fichier `utils/embedHelper.js` contient toutes les fonctions prêtes à l'emploi pour générer vos messages Embeds (`buildEmbed()`, `extractEmbedFields()`, etc.). N'hésitez pas à l'ouvrir !
 
 ---
 
