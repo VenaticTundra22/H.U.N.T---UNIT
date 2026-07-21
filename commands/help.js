@@ -67,7 +67,7 @@ async function handleInteraction(interaction) {
         new ButtonBuilder()
             .setLabel('📖 Documentation')
             .setStyle(ButtonStyle.Link)
-            .setURL('https://venatictundra22.com/projets'),
+            .setURL('https://venatictundra22.com/projets/hunt'),
     );
 
     await interaction.reply({
