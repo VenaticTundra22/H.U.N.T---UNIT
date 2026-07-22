@@ -33,6 +33,7 @@ async function handleInteraction(interaction) {
         // ── Section 1 : Construction ──────────────────────────────
         '> `/builder` — Ouvre le terminal de construction avancé',
         '> `/embed` — Crée et prévisualise un embed personnalisé',
+        '> `/clear` — Supprime un nombre défini de messages dans un salon',
 
         '\u200b', // Ligne vide entre sections
 
