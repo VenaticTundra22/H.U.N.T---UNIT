@@ -12,8 +12,11 @@ discord-bot/
 ├── utils/
 │   └── embedHelper.js    ← Fonctions utilitaires (buildEmbed, validateColor…)
 ├── commands/             ← 📂 Vos commandes (une par fichier)
-│   ├── embed.js
-│   └── builder.js
+│   ├── embed.js           ← /embed
+│   ├── builder.js         ← /builder
+│   ├── clear.js           ← /clear (NEW)
+│   ├── help.js            ← /help (NEW)
+│   └── reactionrole.js    ← /reactionrole (Components V2) (NEW)
 ├── templates/            ← 📂 Templates à copier pour créer une commande
 │   ├── TEMPLATE_simple.js
 │   ├── TEMPLATE_modal.js
@@ -81,8 +84,6 @@ module.exports = { definition, handleInteraction };
 
 ---
 
----
-
 ## 📝 Templates prêts à l'emploi
 
 Pour éviter de réinventer la roue ou d'avoir à mémoriser l'API de Discord, **3 templates complets et commentés** sont à votre disposition dans le dossier `/templates/` :
@@ -92,6 +93,57 @@ Pour éviter de réinventer la roue ou d'avoir à mémoriser l'API de Discord, *
 3. **`TEMPLATE_modal.js`** : Pour une commande qui ouvre un formulaire (modal) pour saisir des données.
 
 💡 **Astuce** : Le fichier `utils/embedHelper.js` contient toutes les fonctions prêtes à l'emploi pour générer vos messages Embeds (`buildEmbed()`, `extractEmbedFields()`, etc.). N'hésitez pas à l'ouvrir !
+
+---
+
+## 🧱 Discord Components V2
+
+Depuis **discord.js 14.18+**, il est possible d'utiliser les **Components V2** pour créer des messages avec un layout avancé.
+La commande `/reactionrole` utilise ce système.
+
+### Builders disponibles
+
+| Builder | Rôle |
+|---|---|
+| `ContainerBuilder` | Conteneur principal (remplace l'embed, avec barre de couleur latérale) |
+| `SectionBuilder` | Ligne avec texte à gauche et un bouton/image à droite |
+| `TextDisplayBuilder` | Affichage de texte Markdown à l'intérieur d'un container |
+| `SeparatorBuilder` | Ligne de séparation horizontale |
+
+### Exemple : bouton aligné à droite d'un texte
+
+```js
+const {
+    ContainerBuilder, SectionBuilder,
+    TextDisplayBuilder, ButtonBuilder,
+    ButtonStyle, MessageFlags
+} = require('discord.js');
+
+const container = new ContainerBuilder()
+    .setAccentColor(0x5865F2)
+    .addSectionComponents(
+        new SectionBuilder()
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('Mon texte à gauche')
+            )
+            .setButtonAccessory(
+                new ButtonBuilder()
+                    .setCustomId('mon_bouton')
+                    .setLabel('Bouton')
+                    .setStyle(ButtonStyle.Secondary)
+            )
+    );
+
+await interaction.reply({
+    components: [container],
+    flags: [MessageFlags.IsComponentsV2],
+});
+```
+
+> **⚠ﺀ Règles importantes des Components V2 :**
+> - Les messages V2 sont **incompatibles** avec la propriété `embeds` traditionnelle.
+> - Toute mise à jour (`update()`) d'un message V2 **doit** conserver le flag `MessageFlags.IsComponentsV2`, sinon Discord rejette la requête.
+> - Requis : `discord.js ≥ 14.18` (ce projet utilise `14.27.0`).
 
 ---
 
@@ -119,6 +171,7 @@ Avant de tester, vérifier :
 | `Missing Permissions` | Bot sans droit dans le salon | Vérifier les permissions du bot dans le salon |
 | Commande non visible | Mauvais export ou pas de redémarrage | Vérifier `module.exports` et relancer le bot |
 | Bouton qui ne répond pas | `customId` mal orthographié | Vérifier que le `customId` du builder = celui du handler |
+| `Invalid Form Body` sur `update()` V2 | Flag `IsComponentsV2` absent lors de la mise à jour | Toujours inclure `flags: [MessageFlags.IsComponentsV2]` dans chaque `update()` ou `reply()` sur un message V2 |
 
 ---
 
@@ -127,4 +180,5 @@ Avant de tester, vérifier :
 - [Discord.js Guide](https://discordjs.guide/) — Guide officiel
 - [Discord.js Docs](https://discord.js.org/) — Documentation de l'API
 - [Discord Developer Portal](https://discord.com/developers/docs/intro) — Documentation Discord
+- [Discord Components V2 — API Docs](https://discord.com/developers/docs/components/reference) — Référence officielle des Components V2
 - [Discohook](https://discohook.org/) — Aperçu visuel d'embeds

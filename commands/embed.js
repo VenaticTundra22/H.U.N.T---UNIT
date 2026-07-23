@@ -41,7 +41,7 @@ const pendingEmbeds = new Map();
 
 const definition = new SlashCommandBuilder()
     .setName('embed')
-    .setDescription('Ouvre le terminal H.U.N.T - UNIT pour configurer et prévisualiser un embed')
+    .setDescription('Ouvre un terminal pour configurer et prévisualiser un embed')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 // ─────────────────────────────────────────────

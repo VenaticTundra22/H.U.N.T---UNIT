@@ -34,6 +34,8 @@ async function handleInteraction(interaction) {
         '> `/builder` — Ouvre le terminal de construction avancé',
         '> `/embed` — Crée et prévisualise un embed personnalisé',
         '> `/clear` — Supprime un nombre défini de messages dans un salon',
+        '> `/reactionrole` — Lance la configuration d\'un panneau de réaction role',
+
 
         '\u200b', // Ligne vide entre sections
 
